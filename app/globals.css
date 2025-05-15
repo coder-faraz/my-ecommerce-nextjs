@@ -17,3 +17,7 @@
 ::-webkit-scrollbar {
   display: none;
 }
+
+.clerk-badge {
+  display: none !important;
+}
