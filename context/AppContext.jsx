@@ -1,9 +1,11 @@
 'use client'
+import axios from "axios";
 import { useRouter } from "next/navigation";
-import { useUser } from '@clerk/nextjs'
+import { useAuth, useUser } from '@clerk/nextjs'
 
 import { productsDummyData, userDummyData } from "@/assets/assets";
 import { createContext, useContext, useEffect, useState } from "react";
+import toast from "react-hot-toast";
 
 export const AppContext = createContext();
 
@@ -16,11 +18,12 @@ export const AppContextProvider = (props) => {
     const currency = process.env.NEXT_PUBLIC_CURRENCY
     const router = useRouter()
 
-    const { user } = useUser()
+    const { user } = useUser();
+    const { getToken } = useAuth();
 
     const [products, setProducts] = useState([])
     const [userData, setUserData] = useState(false)
-    const [isSeller, setIsSeller] = useState(true)
+    const [isSeller, setIsSeller] = useState(false)
     const [cartItems, setCartItems] = useState({})
 
     const fetchProductData = async () => {
@@ -28,7 +31,26 @@ export const AppContextProvider = (props) => {
     }
 
     const fetchUserData = async () => {
-        setUserData(userDummyData)
+        try {
+            if (user.publicMetadata.role === 'seller') {
+                setIsSeller(true);
+            }
+
+            const token = await getToken();
+            console.log(token, 'this is token')
+            const res = await axios.get('/api/user/data', { headers: { Authorization: `Bearer ${token}` } })
+
+            console.log(res, 'this is api res');
+            // if (data.success) {
+            //     setUserData(data.user);
+            //     setCartItems(data.user.cartItems);
+            // } else {
+            //     toast.error(data.message);
+            // }
+        } catch (error) {
+            toast.error(error.message);
+            console.log(error, 'error in fetch user data')
+        }
     }
 
     const addToCart = async (itemId) => {
@@ -82,11 +104,13 @@ export const AppContextProvider = (props) => {
     }, [])
 
     useEffect(() => {
-        fetchUserData()
-    }, [])
+        if (user) {
+            fetchUserData();
+        }
+    }, [user])
 
     const value = {
-        user,
+        user, getToken,
         currency, router,
         isSeller, setIsSeller,
         userData, fetchUserData,
