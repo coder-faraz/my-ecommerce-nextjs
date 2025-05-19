@@ -37,16 +37,14 @@ export const AppContextProvider = (props) => {
             }
 
             const token = await getToken();
-            console.log(token, 'this is token')
-            const res = await axios.get('/api/user/data', { headers: { Authorization: `Bearer ${token}` } })
+            const { data } = await axios.get('/api/user/data', { headers: { Authorization: `Bearer ${token}` } })
 
-            console.log(res, 'this is api res');
-            // if (data.success) {
-            //     setUserData(data.user);
-            //     setCartItems(data.user.cartItems);
-            // } else {
-            //     toast.error(data.message);
-            // }
+            if (data.success) {
+                setUserData(data.user);
+                setCartItems(data.user.cartItems);
+            } else {
+                toast.error(data.message);
+            }
         } catch (error) {
             toast.error(error.message);
             console.log(error, 'error in fetch user data')
