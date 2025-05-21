@@ -3,7 +3,7 @@ import mongoose from "mongoose";
 const userSchema = new mongoose.Schema(
     {
         _id: { type: String, required: true },
-        username: { type: String, required: true },     // when manual account creation (using signup) then u get username
+        username: { type: String },     // when manual account creation (using signup) then u get username
                                                     // but when login using Google then u get first_name & last_name & no username
         email: { type: String, required: true, unique: true },
         imageUrl: { type: String },

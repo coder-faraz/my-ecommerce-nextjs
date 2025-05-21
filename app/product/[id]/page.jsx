@@ -9,15 +9,15 @@ import { useParams } from "next/navigation";
 import Loading from "@/components/Loading";
 import { useAppContext } from "@/context/AppContext";
 import React from "react";
+import { Utility } from "@/lib";
 
 const Product = () => {
 
-    const { id } = useParams();
-
-    const { products, router, addToCart } = useAppContext()
-
     const [mainImage, setMainImage] = useState(null);
     const [productData, setProductData] = useState(null);
+    const { id } = useParams();
+    const { capitalizeFirstLetter } = Utility();
+    const { products, router, addToCart } = useAppContext();
 
     const fetchProductData = async () => {
         const product = products.find(product => product._id === id);
@@ -35,7 +35,7 @@ const Product = () => {
                 <div className="px-5 lg:px-16 xl:px-20">
                     <div className="rounded-lg overflow-hidden bg-gray-500/10 mb-4">
                         <Image
-                            src={mainImage || productData.image[0]}
+                            src={mainImage || productData.images[0]}
                             alt="alt"
                             className="w-full h-auto object-cover mix-blend-multiply"
                             width={1280}
@@ -44,7 +44,7 @@ const Product = () => {
                     </div>
 
                     <div className="grid grid-cols-4 gap-4">
-                        {productData.image.map((image, index) => (
+                        {productData.images.map((image, index) => (
                             <div
                                 key={index}
                                 onClick={() => setMainImage(image)}
@@ -85,7 +85,7 @@ const Product = () => {
                         {productData.description}
                     </p>
                     <p className="text-3xl font-medium mt-6">
-                        ${productData.offerPrice}
+                        {productData.discountedPrice === 0 ? '' : `$${productData.discountedPrice}`}
                         <span className="text-base font-normal text-gray-800/60 line-through ml-2">
                             ${productData.price}
                         </span>
@@ -96,16 +96,16 @@ const Product = () => {
                             <tbody>
                                 <tr>
                                     <td className="text-gray-600 font-medium">Brand</td>
-                                    <td className="text-gray-800/50 ">Generic</td>
+                                    <td className="text-gray-800/50 ">{capitalizeFirstLetter(productData.brand)}</td>
                                 </tr>
                                 <tr>
                                     <td className="text-gray-600 font-medium">Color</td>
-                                    <td className="text-gray-800/50 ">Multi</td>
+                                    <td className="text-gray-800/50 ">{capitalizeFirstLetter(productData.color)}</td>
                                 </tr>
                                 <tr>
                                     <td className="text-gray-600 font-medium">Category</td>
                                     <td className="text-gray-800/50">
-                                        {productData.category}
+                                        {capitalizeFirstLetter(productData.category)}
                                     </td>
                                 </tr>
                             </tbody>
