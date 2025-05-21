@@ -39,7 +39,7 @@ export async function POST(request) {
                 return {
                     productId,                     // ObjectId string
                     name: prod.name,               // snapshot name
-                    image: prod.images[0] || "",   // snapshot image
+                    image: prod.images[0] ?? '',   // snapshot image
                     price,
                     quantity,
                     subtotal
@@ -75,7 +75,7 @@ export async function POST(request) {
         user.cartItems = {};
         await user.save();
 
-        return NextResponse.json({ success: true, message: "Order Placed" });
+        return NextResponse.json({ success: true, message: "Order Placed Successfully" });
 
     } catch (err) {
         console.error("Order create API Error:", err);

@@ -2,6 +2,7 @@ import { Inngest } from "inngest";
 
 import connectToDB from "./db";
 import User from "@/models/User";
+import Product from "@/models/Product";
 import Order from "@/models/Order";
 
 // Create a client to send and receive events
@@ -66,7 +67,7 @@ export const syncUserDeletion = inngest.createFunction(
 
 // Inngest function to create user order in db
 /**
- * Listens for up to 25 `order/created` events (5s timeout),
+ * Listens for up to 5 `order/created` events (3s timeout),
  * then writes them as Order documents in one batch.
  */
 export const userOrderCreation = inngest.createFunction(
@@ -115,6 +116,18 @@ export const userOrderCreation = inngest.createFunction(
         // 2) Connect and insertMany in one go
         await connectToDB();
         await Order.insertMany(orders);
+
+        // 3) Decrement product inventory for each ordered item
+        for (const e of events) {
+            for (const { productId, quantity } of e.data.items) {
+                // Subtract ordered quantity from product stock
+                await Product.findByIdAndUpdate(
+                    productId,
+                    { $inc: { quantity: -quantity } },
+                    { new: true }
+                );
+            }
+        }
         return {
             success: true,
             processed: orders.length

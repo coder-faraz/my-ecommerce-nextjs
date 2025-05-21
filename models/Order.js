@@ -3,6 +3,7 @@ import mongoose from "mongoose";
 const orderItemSchema = new mongoose.Schema({
     productId: { type: mongoose.Schema.Types.ObjectId, ref: 'product', required: true },
     name: { type: String, required: true },
+    image: { type: String, required: true },
     price: { type: Number, required: true },   // unit price at time of order
     quantity: { type: Number, required: true },
     subtotal: { type: Number, required: true }    // price * quantity
