@@ -10,7 +10,6 @@ const OrderSummary = () => {
   const { currency, router, getCartCount, getCartAmount, getToken, cartItems, setCartItems, user } = useAppContext()
   const [selectedAddress, setSelectedAddress] = useState(null);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-
   const [userAddresses, setUserAddresses] = useState([]);
 
   const fetchUserAddresses = async () => {

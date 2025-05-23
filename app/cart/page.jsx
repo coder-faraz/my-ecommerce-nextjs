@@ -29,7 +29,13 @@ const Cart = () => {
                     Product Details
                   </th>
                   <th className="pb-6 md:px-4 px-1 text-gray-600 font-medium">
+                    Brand
+                  </th>
+                  <th className="pb-6 md:px-4 px-1 text-gray-600 font-medium">
                     Price
+                  </th>
+                  <th className="pb-6 md:px-4 px-1 text-gray-600 font-medium">
+                    Discounted Price
                   </th>
                   <th className="pb-6 md:px-4 px-1 text-gray-600 font-medium">
                     Quantity
@@ -75,6 +81,8 @@ const Cart = () => {
                           </button>
                         </div>
                       </td>
+                      <td className="py-4 md:px-4 px-1 text-gray-600">{product.brand}</td>
+                      <td className="py-4 md:px-4 px-1 text-gray-600">${product.price}</td>
                       <td className="py-4 md:px-4 px-1 text-gray-600">${product.discountedPrice}</td>
                       <td className="py-4 md:px-4 px-1">
                         <div className="flex items-center md:gap-2 gap-1">

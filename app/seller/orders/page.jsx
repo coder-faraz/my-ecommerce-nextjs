@@ -5,22 +5,39 @@ import Image from "next/image";
 import { useAppContext } from "@/context/AppContext";
 import Footer from "@/components/seller/Footer";
 import Loading from "@/components/Loading";
+import axios from "axios";
+import toast from "react-hot-toast";
 
 const Orders = () => {
 
-    const { currency } = useAppContext();
+    const { currency, getToken, user } = useAppContext();
 
     const [orders, setOrders] = useState([]);
     const [loading, setLoading] = useState(true);
 
     const fetchSellerOrders = async () => {
-        setOrders(orderDummyData);
+        try {
+            const token = await getToken();
+            const { data } = await axios.get('/api/order/seller-order', { headers: { Authorization: `Bearer ${token}` } })
+
+            if (data.success) {
+                setOrders(data.orders);
+                setLoading(false);
+            } else {
+                toast.error(data.message);
+            }
+        } catch (error) {
+            toast.error(error.message);
+            console.log(error, 'error in fetch seller-order data')
+        }
         setLoading(false);
     }
 
     useEffect(() => {
-        fetchSellerOrders();
-    }, []);
+        if (user) {
+            fetchSellerOrders();
+        }
+    }, [user]);
 
     return (
         <div className="flex-1 h-screen overflow-scroll flex flex-col justify-between text-sm">
@@ -37,27 +54,27 @@ const Orders = () => {
                                 />
                                 <p className="flex flex-col gap-3">
                                     <span className="font-medium">
-                                        {order.items.map((item) => item.product.name + ` x ${item.quantity}`).join(", ")}
+                                        {order.items.map((item) => item.name + ` x ${item.quantity}`).join(", ")}
                                     </span>
                                     <span>Items : {order.items.length}</span>
                                 </p>
                             </div>
                             <div>
                                 <p>
-                                    <span className="font-medium">{order.address.fullName}</span>
+                                    <span className="font-medium">{order.shippingAddress.fullName}</span>
                                     <br />
-                                    <span >{order.address.area}</span>
+                                    <span >{order.shippingAddress.area}</span>
                                     <br />
-                                    <span>{`${order.address.city}, ${order.address.state}`}</span>
+                                    <span>{`${order.shippingAddress.city}, ${order.shippingAddress.state}`}</span>
                                     <br />
-                                    <span>{order.address.phoneNumber}</span>
+                                    <span>{order.shippingAddress.phoneNumber}</span>
                                 </p>
                             </div>
-                            <p className="font-medium my-auto">{currency}{order.amount}</p>
+                            <p className="font-medium my-auto">{currency}{order.totalAmount}</p>
                             <div>
                                 <p className="flex flex-col">
                                     <span>Method : COD</span>
-                                    <span>Date : {new Date(order.date).toLocaleDateString()}</span>
+                                    <span>Date : {new Date(order.createdAt).toLocaleDateString()}</span>
                                     <span>Payment : Pending</span>
                                 </p>
                             </div>
