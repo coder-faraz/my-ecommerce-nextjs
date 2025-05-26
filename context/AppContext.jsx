@@ -111,16 +111,36 @@ export const AppContextProvider = (props) => {
         return totalCount;
     }
 
-    const getCartAmount = () => {
-        let totalAmount = 0;
-        for (const items in cartItems) {
-            let itemInfo = products.find((product) => product._id === items);
-            if (cartItems[items] > 0) {
-                totalAmount += itemInfo.discountedPrice * cartItems[items];     //add logic when no discount
-            }
+    /**
+     * Compute both original and discounted totals for the current cart.
+     * @returns {{ originalTotal: number, discountedTotal: number, discountAmount: number }}
+     */
+    const getCartTotals = () => {
+        let originalTotal = 0;
+        let discountedTotal = 0;
+
+        for (const productId in cartItems) {
+            const qty = cartItems[productId];
+            if (qty <= 0) continue;
+
+            const prod = products.find(p => p._id === productId);
+            if (!prod) continue;
+
+            // accumulate original and discounted
+            originalTotal += prod.price * qty;
+            discountedTotal += (prod.discountedPrice ?? prod.price) * qty;
         }
-        return Math.floor(totalAmount * 100) / 100;
-    }
+
+        // round to 2 decimal places
+        originalTotal = Math.round(originalTotal * 100) / 100;
+        discountedTotal = Math.round(discountedTotal * 100) / 100;
+
+        return {
+            originalTotal,
+            discountedTotal,
+            discountAmount: originalTotal - discountedTotal
+        };
+    };
 
     useEffect(() => {
         fetchProductData()
@@ -140,7 +160,7 @@ export const AppContextProvider = (props) => {
         products, fetchProductData,
         cartItems, setCartItems,
         addToCart, updateCartQuantity,
-        getCartCount, getCartAmount
+        getCartCount, getCartTotals
     }
 
     return (

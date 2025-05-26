@@ -35,9 +35,6 @@ const Cart = () => {
                     Price
                   </th>
                   <th className="pb-6 md:px-4 px-1 text-gray-600 font-medium">
-                    Discounted Price
-                  </th>
-                  <th className="pb-6 md:px-4 px-1 text-gray-600 font-medium">
                     Quantity
                   </th>
                   <th className="pb-6 md:px-4 px-1 text-gray-600 font-medium">
@@ -50,6 +47,9 @@ const Cart = () => {
                   const product = products.find(product => product._id === itemId);
 
                   if (!product || cartItems[itemId] <= 0) return null;
+                  // calculate discount percent
+                  const discountPercent = product.discountPercent
+                    ?? Math.round(100 - (product.discountedPrice / product.price * 100));
 
                   return (
                     <tr key={itemId}>
@@ -82,8 +82,19 @@ const Cart = () => {
                         </div>
                       </td>
                       <td className="py-4 md:px-4 px-1 text-gray-600">{product.brand}</td>
-                      <td className="py-4 md:px-4 px-1 text-gray-600">${product.price}</td>
-                      <td className="py-4 md:px-4 px-1 text-gray-600">${product.discountedPrice}</td>
+                      <td className="py-4 md:px-4 px-1 text-gray-600">
+                        <div className="flex flex-col">
+                          <span className="line-through text-gray-500">
+                            ${product.price.toFixed(2)}
+                          </span>
+                          <span className="font-medium text-gray-800">
+                            ${product.discountedPrice.toFixed(2)}
+                          </span>
+                          <span className="text-green-600 text-xs">
+                            {discountPercent}% Off
+                          </span>
+                        </div>
+                      </td>
                       <td className="py-4 md:px-4 px-1">
                         <div className="flex items-center md:gap-2 gap-1">
                           <button onClick={() => updateCartQuantity(product._id, cartItems[itemId] - 1)}>
@@ -96,7 +107,7 @@ const Cart = () => {
                           <input onChange={e => updateCartQuantity(product._id, Number(e.target.value))} type="number" value={cartItems[itemId]} className="w-8 border text-center appearance-none"></input>
                           <button onClick={() => addToCart(product._id)}>
                             <Image
-                              src={assets.increase_arrow}
+                              src={assets.add_icon}
                               alt="increase_arrow"
                               className="w-4 h-4"
                             />

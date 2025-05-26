@@ -9,19 +9,21 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@clerk/express": "^1.5.0",
     "@clerk/nextjs": "6.19.3",
     "axios": "^1.9.0",
     "cloudinary": "^2.6.1",
     "inngest": "3.35.1",
     "mongoose": "8.14.3",
     "next": "15.2.3",
+    "razorpay": "^2.8.0",
     "react": "19.0.0",
     "react-dom": "19.0.0",
     "react-hot-toast": "2.5.1"
   },
   "devDependencies": {
     "@eslint/eslintrc": "3.0.0",
-    "eslint": "9.0.0",
+    "eslint": "^9.7.0",
     "eslint-config-next": "15.2.3",
     "postcss": "8.4.38",
     "tailwindcss": "3.4.1"

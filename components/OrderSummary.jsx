@@ -7,10 +7,11 @@ import { addressDummyData } from "@/assets/assets";
 
 const OrderSummary = () => {
 
-  const { currency, router, getCartCount, getCartAmount, getToken, cartItems, setCartItems, user } = useAppContext()
+  const { currency, router, getCartCount, getCartTotals, getToken, cartItems, setCartItems, user } = useAppContext()
   const [selectedAddress, setSelectedAddress] = useState(null);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [userAddresses, setUserAddresses] = useState([]);
+  const { originalTotal, discountedTotal, discountAmount } = getCartTotals();
 
   const fetchUserAddresses = async () => {
     try {
@@ -63,7 +64,7 @@ const OrderSummary = () => {
 
       if (data.success) {
         setCartItems({});
-        router.push('/order-placed');
+        router.push('/payment-screen');
       } else {
         toast.error(data.message);
       }
@@ -88,7 +89,7 @@ const OrderSummary = () => {
       <div className="space-y-6">
         <div>
           <label className="text-base font-medium uppercase text-gray-600 block mb-2">
-            Select Address
+            Select Delivery Address
           </label>
           <div className="relative inline-block w-full text-sm border">
             <button
@@ -98,7 +99,7 @@ const OrderSummary = () => {
               <span>
                 {selectedAddress
                   ? `${selectedAddress.fullname}, ${selectedAddress.area}, ${selectedAddress.city}, ${selectedAddress.state}`
-                  : "Select Address"}
+                  : "Select Delivery Address"}
               </span>
               <svg className={`w-5 h-5 inline float-right transition-transform duration-200 ${isDropdownOpen ? "rotate-0" : "-rotate-90"}`}
                 xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="#6B7280"
@@ -127,9 +128,12 @@ const OrderSummary = () => {
               </ul>
             )}
           </div>
+          <div className="text-xs text-orange-600 mt-1 ml-1">
+            Deliver Here
+          </div>
         </div>
 
-        <div>
+        {/* <div>
           <label className="text-base font-medium uppercase text-gray-600 block mb-2">
             Promo Code
           </label>
@@ -143,26 +147,36 @@ const OrderSummary = () => {
               Apply
             </button>
           </div>
-        </div>
+        </div> */}
 
         <hr className="border-gray-500/30 my-5" />
 
+        <label className="text-base font-medium uppercase text-gray-600 block mb-2">
+          Price Details
+        </label>
         <div className="space-y-4">
           <div className="flex justify-between text-base font-medium">
-            <p className="uppercase text-gray-600">Items {getCartCount()}</p>
-            <p className="text-gray-800">{currency}{getCartAmount()}</p>
+            <p className="text-gray-800">Price ({getCartCount()} Items)</p>
+            <p className="text-gray-800">{currency}{originalTotal.toFixed(2)}</p>
+          </div>
+          <div className="flex justify-between text-base font-medium">
+            <p className="text-gray-800">Discount</p>
+            <p className="text-gray-800">-{currency}{discountAmount.toFixed(2)}</p>
           </div>
           <div className="flex justify-between">
-            <p className="text-gray-600">Shipping Fee</p>
-            <p className="font-medium text-gray-800">Free</p>
+            <p className="text-gray-800">Shipping Fee</p>
+            <p className="font-medium text-gray-800">
+              <span className="text-base font-normal text-gray-800/60 line-through ml-2">
+                $2
+              </span> Free</p>
           </div>
           <div className="flex justify-between">
-            <p className="text-gray-600">Tax (2%)</p>
-            <p className="font-medium text-gray-800">{currency}{Math.floor(getCartAmount() * 0.02)}</p>
+            <p className="text-gray-800">Tax (2%)</p>
+            <p className="font-medium text-gray-800">{currency}{Math.floor(discountedTotal * 0.02)}</p>
           </div>
           <div className="flex justify-between text-lg md:text-xl font-medium border-t pt-3">
-            <p>Total</p>
-            <p>{currency}{getCartAmount() + Math.floor(getCartAmount() * 0.02)}</p>
+            <p>Total Amount</p>
+            <p>{currency}{discountedTotal + Math.floor(discountedTotal * 0.02)}</p>
           </div>
         </div>
       </div>
