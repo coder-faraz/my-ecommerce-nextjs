@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import axios from 'axios';
+import { Utility } from '@/lib';
 
 export default function CategoriesPage() {
     const [categories, setCategories] = useState([]);
@@ -10,6 +11,7 @@ export default function CategoriesPage() {
     const [selectedParent, setSelectedParent] = useState('');
     const [error, setError] = useState(null);
     const router = useRouter();
+    const { capitalizeFirstLetter } = Utility();
 
     // Fetch categories on mount
     useEffect(() => {
@@ -119,7 +121,7 @@ export default function CategoriesPage() {
                             onChange={(e) => setSelectedParent(e.target.value)}
                             className="outline-none md:py-2.5 py-2 px-3 rounded border border-gray-500/40"
                         >
-                            <option value="">No parent category</option>
+                            <option value="" hidden>No parent category</option>
                             {categories
                                 .filter((cat) => !cat.parent)
                                 .map((cat) => (
@@ -168,7 +170,7 @@ export default function CategoriesPage() {
                             key={category._id}
                             className="grid grid-cols-3 p-2 border-b last:border-b-0"
                         >
-                            <div>{category.name}</div>
+                            <div>{capitalizeFirstLetter(category.name)}</div>
                             <div>{category.parent ? category.parent.name : ''}</div>
                             <div className="flex gap-2">
                                 <button

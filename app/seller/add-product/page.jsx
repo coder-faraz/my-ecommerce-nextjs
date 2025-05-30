@@ -191,14 +191,13 @@ const AddProduct = () => {
                 className="outline-none md:py-2.5 py-2 px-3 rounded border border-gray-500/40"
                 onChange={(e) => setCategory(e.target.value)}
               >
-                <option value="man">Man</option>
-                <option value="woman">Woman</option>
+                <option value="men">Men</option>
+                <option value="women">Women</option>
                 <option value="accessories">Accessories</option>
-                <option value="headphone">Headphone</option>
-                <option value="earphone">Earphone</option>
-                <option value="laptop">Laptop</option>
-                <option value="smartphone">Smartphone</option>
-                <option value="watch">Watch</option>
+                <option value="headphones">Headphones</option>
+                <option value="laptops">Laptops</option>
+                <option value="mobiles">Mobiles</option>
+                <option value="smartwatches">Smartwatches</option>
               </select>
             </div>
             <div className="flex flex-col gap-1 w-32">

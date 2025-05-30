@@ -21,19 +21,25 @@ export async function GET(request) {
 
         // Database connection
         await connectToDB();
+        const allProducts = await Product.find({})
+            .populate('categoryId', 'name') // Populate category name from categoryId
+            .sort({ createdAt: -1 });
 
-        // Look up the user by their ID
-        const allProducts = await Product.find({});
-
-        // If no user is found, return a 404-style JSON response
-        if (!allProducts) {
+        // If no product is found, return a 404-style JSON response
+        if (!allProducts || allProducts.length === 0) {
             return NextResponse.json(
                 { success: false, message: "Products Not Found" },
                 { status: 404 }
             );
         }
-        // Otherwise return the user data
-        return NextResponse.json({ success: true, allProducts });
+        // Transform the data to include category name properly
+        const transformedProducts = allProducts.map(product => ({
+            ...product.toObject(),
+            categoryName: product.categoryId?.name || product.category,
+        }));
+
+        // Return the products
+        return NextResponse.json({ success: true, allProducts: transformedProducts });
     } catch (error) {
         console.error(error, 'error in get products route');
         // On any other error, return a 500-style JSON response

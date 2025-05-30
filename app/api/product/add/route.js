@@ -5,6 +5,7 @@ import { NextResponse } from "next/server";
 import connectToDB from "@/config/db";
 import authSeller from "@/lib/authSeller";
 import Product from '@/models/Product';
+import { getCategoryIdByName } from "@/lib/categoryHelper";
 
 // Configuration for cloudinary
 cloudinary.config({
@@ -15,7 +16,7 @@ cloudinary.config({
 
 export async function POST(request) {
     try {
-        // Extract the authenticated user’s ID from the request
+        // Extract the authenticated user's ID from the request
         const { userId } = getAuth(request);
         if (!userId || !(await authSeller(userId))) {
             return NextResponse.json({ success: false, message: "Not Authorized" }, { status: 401 });
@@ -33,6 +34,16 @@ export async function POST(request) {
         const quantity = formData.get('quantity') || 0;
         const discountPercent = parseFloat(formData.get('discountPercent') || 0);
         const discountedPrice = parseFloat(formData.get('discountedPrice') || 0);
+
+        // Validate category and get category ID
+        const categoryId = await getCategoryIdByName(category);
+
+        if (!categoryId) {
+            return NextResponse.json(
+                { success: false, message: `Invalid category: ${category}. Please provide a valid category name.` },
+                { status: 400 }
+            );
+        }
 
         const imgFiles = formData.getAll('images');
         if (!imgFiles || imgFiles.length === 0) {
@@ -76,7 +87,8 @@ export async function POST(request) {
             description,
             brand,
             color,
-            category,
+            category, // Keep for backward compatibility
+            categoryId, // New reference field
             quantity: Number(quantity),
             price: Number(price),
             discountPercent,
