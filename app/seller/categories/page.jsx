@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import axios from 'axios';
+
 import { Utility } from '@/lib';
 
 export default function CategoriesPage() {
@@ -17,7 +18,7 @@ export default function CategoriesPage() {
     useEffect(() => {
         const fetchCategories = async () => {
             try {
-                const { data } = await axios.get('/api/category');
+                const { data } = await axios.get('/api/category/seller-list');
                 if (!data.success) {
                     if (data.message === 'Not Authorized') {
                         router.push('/login');
@@ -41,7 +42,7 @@ export default function CategoriesPage() {
         }
 
         try {
-            const { data } = await axios.post('/api/category', {
+            const { data } = await axios.post('/api/category/add', {
                 name: newCategory,
                 parent: selectedParent || null,
             });

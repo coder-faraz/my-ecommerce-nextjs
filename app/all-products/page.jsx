@@ -31,8 +31,7 @@ const AllProducts = () => {
     useEffect(() => {
         const fetchCategories = async () => {
             try {
-                const response = await fetch('/api/category');
-                const data = await response.json();
+                const { data } = await axios.get('/api/category/list');
                 if (data.success) {
                     setCategories(data.categories);
                 } else {

@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 
 import connectToDB from "@/config/db";
 import Product from "@/models/Product";
+import Category from "@/models/Category"; // Import the Category Model even if not directly using it
 
 export async function GET(request) {
     try {
@@ -78,7 +79,7 @@ export async function GET(request) {
 
         const allProducts = await Product.find(query)
             .populate('categoryId', 'name')
-            .sort({ createdAt: -1 })
+            .sort(sortObj) // FIX: Use the sortObj instead of hardcoded sort
             .skip(skip)
             .limit(limit);
 
@@ -88,6 +89,7 @@ export async function GET(request) {
                 { status: 404 }
             );
         }
+
         // Get price range for filter slider
         const priceStats = await Product.aggregate([
             {

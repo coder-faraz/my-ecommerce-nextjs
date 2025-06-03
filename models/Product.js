@@ -14,12 +14,27 @@ const productSchema = new mongoose.Schema(
         discountedPrice: { type: Number, default: 0 },
         quantity: { type: Number, default: 0 },
         images: [{ type: String }],
+        rating: {
+            type: Number,
+            default: 0,
+            min: 0,
+            max: 5
+        },
+        reviewCount: {
+            type: Number,
+            default: 0
+        }
     },
     {
         minimize: false,
         timestamps: true
     }
 );
+
+// Index for better query performance
+productSchema.index({ categoryId: 1, price: 1 });
+productSchema.index({ rating: -1 });
+productSchema.index({ name: 'text', description: 'text' });
 
 const Product =
     mongoose.models.product || mongoose.model("product", productSchema);
