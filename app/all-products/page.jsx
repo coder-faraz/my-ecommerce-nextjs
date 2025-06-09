@@ -15,6 +15,9 @@ const AllProducts = () => {
     const [selectedCategory, setSelectedCategory] = useState(null);
     const [loading, setLoading] = useState(false);
 
+    // Get wishlist functionality from context
+    const { wishlistItems, toggleWishlist, user } = useAppContext();
+
     // Pagination states
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
@@ -26,6 +29,20 @@ const AllProducts = () => {
     const [selectedRating, setSelectedRating] = useState(null);
     const [sortBy, setSortBy] = useState('newest');
     const [showFilters, setShowFilters] = useState(false);
+
+    // Check if a product is in wishlist
+    const isInWishlist = (productId) => {
+        return wishlistItems.includes(productId);
+    };
+
+    // Handle wishlist toggle
+    const handleWishlistToggle = async (productId) => {
+        if (!user) {
+            toast.error('Please login to add items to wishlist');
+            return;
+        }
+        await toggleWishlist(productId);
+    };
 
     // Fetch categories on component mount
     useEffect(() => {
@@ -466,7 +483,12 @@ const AllProducts = () => {
                             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 gap-6 w-full">
                                 {filteredProducts.length > 0 ? (
                                     filteredProducts.map((product, index) => (
-                                        <ProductCard key={`${product._id}-${currentPage}`} product={product} />
+                                        <ProductCard
+                                            key={`${product._id}-${currentPage}`}
+                                            product={product}
+                                            isInWishlist={isInWishlist(product._id)}
+                                            onWishlistToggle={() => handleWishlistToggle(product._id)}
+                                        />
                                     ))
                                 ) : (
                                     <div className="col-span-full text-center py-12">

@@ -4,6 +4,7 @@ import mongoose from 'mongoose';
 import connectToDB from "@/config/db";
 import Review from "@/models/Review";
 import Product from "@/models/Product";
+import User from "@/models/User";
 
 // GET - Fetch reviews for a specific product
 export async function GET(request) {
@@ -28,11 +29,51 @@ export async function GET(request) {
         await connectToDB();
         const skip = (page - 1) * limit;
 
-        // Get reviews with pagination
-        const reviews = await Review.find({ productId })
-            .sort({ createdAt: -1 })
-            .skip(skip)
-            .limit(limit);
+        // Get reviews with user details using aggregation
+        const reviewsWithUsers = await Review.aggregate([
+            { $match: { productId: new mongoose.Types.ObjectId(productId) } },
+            { $sort: { createdAt: -1 } },
+            { $skip: skip },
+            { $limit: limit },
+            {
+                $lookup: {
+                    from: 'users', // Make sure this matches your User collection name
+                    localField: 'userId',
+                    foreignField: '_id',
+                    as: 'userDetails'
+                }
+            },
+            {
+                $addFields: {
+                    userName: {
+                        $cond: {
+                            if: { $gt: [{ $size: '$userDetails' }, 0] },
+                            then: { $arrayElemAt: ['$userDetails.name', 0] },
+                            else: 'Anonymous User'
+                        }
+                    },
+                    userEmail: {
+                        $cond: {
+                            if: { $gt: [{ $size: '$userDetails' }, 0] },
+                            then: { $arrayElemAt: ['$userDetails.email', 0] },
+                            else: null
+                        }
+                    }
+                }
+            },
+            {
+                $project: {
+                    productId: 1,
+                    userId: 1,
+                    rating: 1,
+                    comment: 1,
+                    createdAt: 1,
+                    updatedAt: 1,
+                    userName: 1,
+                    userEmail: 1,
+                }
+            }
+        ]);
 
         const totalReviews = await Review.countDocuments({ productId });
 
@@ -71,7 +112,7 @@ export async function GET(request) {
 
         return NextResponse.json({
             success: true,
-            reviews,
+            reviews: reviewsWithUsers,
             stats,
             pagination: {
                 currentPage: page,
