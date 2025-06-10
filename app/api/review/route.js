@@ -6,7 +6,7 @@ import Review from "@/models/Review";
 import Product from "@/models/Product";
 import User from "@/models/User";
 
-// GET - Fetch reviews for a specific product
+// GET - Fetch approved reviews for a specific product (public)
 export async function GET(request) {
     try {
         const { searchParams } = new URL(request.url);
@@ -26,18 +26,24 @@ export async function GET(request) {
                 { status: 400 }
             );
         }
+
         await connectToDB();
         const skip = (page - 1) * limit;
 
-        // Get reviews with user details using aggregation
+        // Get only approved reviews with user details using aggregation
         const reviewsWithUsers = await Review.aggregate([
-            { $match: { productId: new mongoose.Types.ObjectId(productId) } },
+            {
+                $match: {
+                    productId: new mongoose.Types.ObjectId(productId),
+                    status: 'approved' // Only show approved reviews
+                }
+            },
             { $sort: { createdAt: -1 } },
             { $skip: skip },
             { $limit: limit },
             {
                 $lookup: {
-                    from: 'users', // Make sure this matches your User collection name
+                    from: 'users',
                     localField: 'userId',
                     foreignField: '_id',
                     as: 'userDetails'
@@ -67,19 +73,29 @@ export async function GET(request) {
                     userId: 1,
                     rating: 1,
                     comment: 1,
+                    status: 1,
                     createdAt: 1,
                     updatedAt: 1,
                     userName: 1,
-                    userEmail: 1,
+                    userEmail: 1
                 }
             }
         ]);
 
-        const totalReviews = await Review.countDocuments({ productId });
+        // Count only approved reviews
+        const totalReviews = await Review.countDocuments({
+            productId,
+            status: 'approved'
+        });
 
-        // Calculate rating statistics
+        // Calculate rating statistics based on approved reviews only
         const ratingStats = await Review.aggregate([
-            { $match: { productId: new mongoose.Types.ObjectId(productId) } },
+            {
+                $match: {
+                    productId: new mongoose.Types.ObjectId(productId),
+                    status: 'approved'
+                }
+            },
             {
                 $group: {
                     _id: null,
@@ -132,11 +148,16 @@ export async function GET(request) {
     }
 }
 
-// Function to update product statistics
+// Function to update product statistics (only approved reviews)
 async function updateProductStats(productId) {
     try {
         const stats = await Review.aggregate([
-            { $match: { productId: new mongoose.Types.ObjectId(productId) } },
+            {
+                $match: {
+                    productId: new mongoose.Types.ObjectId(productId),
+                    status: 'approved'
+                }
+            },
             {
                 $group: {
                     _id: null,
@@ -162,7 +183,7 @@ async function updateProductStats(productId) {
     }
 }
 
-// POST - Add a new review
+// POST - Add a new review (status: pending by default)
 export async function POST(request) {
     try {
         const { productId, userId, rating, comment } = await request.json();
@@ -180,15 +201,24 @@ export async function POST(request) {
                 { status: 400 }
             );
         }
+
         if (!mongoose.Types.ObjectId.isValid(productId)) {
             return NextResponse.json(
                 { success: false, message: "Invalid Product ID format" },
                 { status: 400 }
             );
         }
+
         await connectToDB();
 
-        const existingReview = await Review.findOne({ productId, userId });
+        // Check if user already reviewed this product
+        // only block if they have a pending or approved review
+        const existingReview = await Review.findOne({
+            productId,
+            userId,
+            status: { $ne: 'rejected' }
+        });
+
         if (existingReview) {
             return NextResponse.json(
                 { success: false, message: "You have already reviewed this product" },
@@ -196,6 +226,7 @@ export async function POST(request) {
             );
         }
 
+        // Verify product exists
         const product = await Product.findById(productId);
         if (!product) {
             return NextResponse.json(
@@ -204,18 +235,23 @@ export async function POST(request) {
             );
         }
 
+        // Create new review with pending status
         const newReview = new Review({
             productId,
             userId,
             rating,
-            comment
+            comment,
+            status: 'pending' // Default status is pending
         });
+
         await newReview.save();
-        await updateProductStats(productId);
+
+        // Don't update product stats yet since review is pending
+        // Stats will be updated when review is approved
 
         return NextResponse.json({
             success: true,
-            message: "Review added successfully",
+            message: "Review submitted successfully and is pending approval",
             review: newReview
         });
 

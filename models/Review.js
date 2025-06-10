@@ -22,12 +22,39 @@ const reviewSchema = new mongoose.Schema({
         trim: true,
         maxlength: 1000
     },
-}, {
-    timestamps: true
-});
+    status: {
+        type: String,
+        enum: ['pending', 'approved', 'rejected'],
+        default: 'pending'
+    },
+    approvedBy: {
+        type: String,
+        ref: 'user',
+        default: null
+    },
+    approvedAt: {
+        type: Date,
+        default: null
+    },
+    rejectionReason: {
+        type: String,
+        default: null
+    },
+},
+    {
+        timestamps: true
+    }
+);
 
-// Create compound index to prevent duplicate reviews from same user for same product
-reviewSchema.index({ productId: 1, userId: 1 }, { unique: true });
+// Partial unique index: only one non-rejected review per user per product
+reviewSchema.index(
+    { productId: 1, userId: 1 },
+    {
+        unique: true,
+        partialFilterExpression: { status: { $ne: 'rejected' } }
+    }
+);
+reviewSchema.index({ status: 1, createdAt: -1 });
 
 const Review = mongoose.models.review || mongoose.model('review', reviewSchema);
 
