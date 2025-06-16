@@ -2,11 +2,10 @@ import { NextResponse } from "next/server";
 
 import connectToDB from "@/config/db";
 import Product from "@/models/Product";
-import Category from "@/models/Category"; // Import the Category Model even if not directly using it
+import Category from "@/models/Category";
 
 export async function GET(request) {
     try {
-        // Extract query parameters from the request URL
         const { searchParams } = new URL(request.url);
         const categoryId = searchParams.get("categoryId");
         const page = parseInt(searchParams.get("page")) || 1;
@@ -19,7 +18,10 @@ export async function GET(request) {
         const sortBy = searchParams.get("sortBy");
         const searchTerm = searchParams.get("search");
 
-        const query = {};
+        // New filter parameters
+        const filterType = searchParams.get("filterType"); // 'latest', 'topRated', 'bestSelling', 'featured'
+
+        const query = { isActive: true }; // Only show active products
 
         // Category filter
         if (categoryId) {
@@ -46,6 +48,26 @@ export async function GET(request) {
             ];
         }
 
+        // Filter by product type
+        switch (filterType) {
+            case 'latest':
+                // Products created in last 30 days
+                const thirtyDaysAgo = new Date();
+                thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+                query.createdAt = { $gte: thirtyDaysAgo };
+                break;
+            case 'topRated':
+                query.rating = { $gte: 3 };
+                query.reviewCount = { $gt: 0 };
+                break;
+            case 'bestSelling':
+                query.salesCount = { $gte: 1 };
+                break;
+            case 'featured':
+                query.isFeatured = true;
+                break;
+        }
+
         // Build sort object
         let sortObj = { createdAt: -1 }; // default sort by newest
 
@@ -57,7 +79,7 @@ export async function GET(request) {
                 sortObj = { price: -1 };
                 break;
             case 'rating':
-                sortObj = { rating: -1 };
+                sortObj = { rating: -1, reviewCount: -1 };
                 break;
             case 'nameAZ':
                 sortObj = { name: 1 };
@@ -65,21 +87,32 @@ export async function GET(request) {
             case 'nameZA':
                 sortObj = { name: -1 };
                 break;
+            case 'bestSelling':
+                sortObj = { salesCount: -1 };
+                break;
             case 'newest':
             default:
                 sortObj = { createdAt: -1 };
                 break;
         }
 
+        // Special sorting for filter types
+        if (filterType === 'topRated') {
+            sortObj = { rating: -1, reviewCount: -1 };
+        } else if (filterType === 'bestSelling') {
+            sortObj = { salesCount: -1 };
+        } else if (filterType === 'featured') {
+            sortObj = { createdAt: -1 };
+        }
+
         await connectToDB();
         const totalCount = await Product.countDocuments(query);
 
-        // Calculate skip value
         const skip = (page - 1) * limit;
 
         const allProducts = await Product.find(query)
             .populate('categoryId', 'name')
-            .sort(sortObj) // FIX: Use the sortObj instead of hardcoded sort
+            .sort(sortObj)
             .skip(skip)
             .limit(limit);
 
@@ -92,6 +125,7 @@ export async function GET(request) {
 
         // Get price range for filter slider
         const priceStats = await Product.aggregate([
+            { $match: { isActive: true } },
             {
                 $group: {
                     _id: null,
@@ -103,6 +137,7 @@ export async function GET(request) {
 
         // Get available ratings
         const ratingStats = await Product.aggregate([
+            { $match: { isActive: true } },
             {
                 $group: {
                     _id: null,
@@ -111,7 +146,6 @@ export async function GET(request) {
             }
         ]);
 
-        // Return products with metadata
         return NextResponse.json({
             success: true,
             allProducts,
@@ -123,13 +157,13 @@ export async function GET(request) {
             metadata: {
                 totalCount: allProducts.length,
                 priceRange: priceStats[0] || { minPrice: 0, maxPrice: 100000 },
-                availableRatings: ratingStats[0]?.ratings?.filter(r => r != null).sort((a, b) => b - a) || []
+                availableRatings: ratingStats[0]?.ratings?.filter(r => r != null).sort((a, b) => b - a) || [],
+                filterType
             }
         });
 
     } catch (error) {
         console.error(error, 'error in get products route');
-        // On any other error, return a 500-style JSON response
         return NextResponse.json(
             { success: false, message: error.message },
             { status: 500 }

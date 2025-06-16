@@ -23,6 +23,27 @@ const productSchema = new mongoose.Schema(
         reviewCount: {
             type: Number,
             default: 0
+        },
+        salesCount: {
+            type: Number,
+            default: 0,
+            min: 0
+        },
+        isFeatured: {
+            type: Boolean,
+            default: false
+        },
+        isActive: {
+            type: Boolean,
+            default: true
+        },
+        isTrending: {
+            type: Boolean,
+            default: false
+        },
+        isNewArrival: {
+            type: Boolean,
+            default: false
         }
     },
     {
@@ -34,9 +55,29 @@ const productSchema = new mongoose.Schema(
 // Index for better query performance
 productSchema.index({ categoryId: 1, price: 1 });
 productSchema.index({ rating: -1 });
+productSchema.index({ salesCount: -1 });
+productSchema.index({ isFeatured: 1 });
+productSchema.index({ isNewArrival: 1 });
+productSchema.index({ createdAt: -1 });
 productSchema.index({ name: 'text', description: 'text' });
 
-const Product =
-    mongoose.models.product || mongoose.model("product", productSchema);
+// Virtual field to determine if product is "latest" (created within last 30 days)
+productSchema.virtual('isLatest').get(function () {
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+    return this.createdAt > thirtyDaysAgo;
+});
+
+// Virtual field to determine if product is "top rated" (rating >= 4)
+productSchema.virtual('isTopRated').get(function () {
+    return this.rating >= 4 && this.reviewCount > 0;
+});
+
+// Virtual field to determine if product is "best selling" (salesCount >= 50)
+productSchema.virtual('isBestSelling').get(function () {
+    return this.salesCount >= 50;
+});
+
+const Product = mongoose.models.product || mongoose.model("product", productSchema);
 
 export default Product;

@@ -1,5 +1,5 @@
 "use client"
-import React, { useState } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import Link from "next/link"
 import Image from "next/image";
 import { useClerk, UserButton } from '@clerk/nextjs'
@@ -10,13 +10,60 @@ const Navbar = () => {
   const { isSeller, router, user, getCartCount, getWishlistCount } = useAppContext();
   const { openSignIn } = useClerk();
   const [searchQuery, setSearchQuery] = useState('');
+  const timeoutRef = useRef(null);
+
+  // Handle search input change with optimized debouncing
+  const handleSearchChange = (e) => {
+    const query = e.target.value;
+    setSearchQuery(query);
+
+    // Clear previous timeout
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+    }
+
+    // Handle empty search
+    if (query.length === 0) {
+      if (router.asPath?.includes('search=')) {
+        router.push('/all-products');
+      }
+      return;
+    }
+
+    // Set new timeout for debouncing - only search with 2+ characters
+    timeoutRef.current = setTimeout(() => {
+      if (query.trim().length >= 2) {
+        router.push(`/all-products?search=${encodeURIComponent(query.trim())}`);
+      }
+    }, 800);
+  };
 
   const handleSearch = (e) => {
     e.preventDefault();
     if (searchQuery.trim()) {
-      router.push(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
+      // Clear timeout to prevent double navigation
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+      router.push(`/all-products?search=${encodeURIComponent(searchQuery.trim())}`);
     }
   };
+
+  // Clear search input based on URL
+  useEffect(() => {
+    if (!router.asPath?.includes('search=')) {
+      setSearchQuery('');
+    }
+  }, [router.asPath]);
+
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+    };
+  }, []);
 
   return (
     <nav className="flex items-center justify-between px-6 md:px-16 lg:px-32 py-3 border-b border-gray-300 text-gray-700">
@@ -55,11 +102,29 @@ const Navbar = () => {
               <input
                 type="text"
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                onChange={handleSearchChange}
                 placeholder="Search products..."
                 className="w-48 lg:w-64 pl-10 pr-4 py-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
               />
-              <Image src={assets.search_icon} alt="search" className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4" />
+              <Image
+                src={assets.search_icon}
+                alt="search"
+                className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4"
+              />
+              {searchQuery && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSearchQuery('');
+                    if (router.asPath?.includes('search=')) {
+                      router.push('/all-products');
+                    }
+                  }}
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                >
+                  ✕
+                </button>
+              )}
             </div>
           </form>
         )}

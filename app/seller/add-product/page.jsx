@@ -22,6 +22,10 @@ const AddProduct = () => {
   const [price, setPrice] = useState('');
   const [discountPercent, setDiscountPercent] = useState('');
   const [discountedPrice, setDiscountedPrice] = useState('');
+  const [isFeatured, setIsFeatured] = useState(false);
+  const [isTrending, setIsTrending] = useState(false);
+  const [isNewArrival, setIsNewArrival] = useState(false);
+  const [isActive, setIsActive] = useState(true);
   const [loading, setLoading] = useState(false);
   const { getToken } = useAppContext();
 
@@ -45,6 +49,10 @@ const AddProduct = () => {
     setPrice('');
     setDiscountPercent('');
     setDiscountedPrice('');
+    setIsFeatured(false);
+    setIsTrending(false);
+    setIsNewArrival(false);
+    setIsActive(true);
   };
 
   const hasChanges = () => {
@@ -57,7 +65,11 @@ const AddProduct = () => {
       quantity.trim() ||
       category ||
       price ||
-      discountPercent
+      discountPercent ||
+      isFeatured ||
+      isTrending ||
+      isNewArrival ||
+      !isActive
     );
   };
 
@@ -80,6 +92,10 @@ const AddProduct = () => {
     formData.append('price', price);
     formData.append('discountPercent', discountPercent);
     formData.append('discountedPrice', discountedPrice);
+    formData.append('isFeatured', isFeatured);
+    formData.append('isTrending', isTrending);
+    formData.append('isNewArrival', isNewArrival);
+    formData.append('isActive', isActive);
 
     files.forEach(file => file && formData.append('images', file));
 
@@ -114,7 +130,6 @@ const AddProduct = () => {
           <div>
             <p className="text-base font-medium">Image</p>
             <div className="flex flex-wrap items-center gap-3 mt-2">
-
               {[...Array(4)].map((_, index) => (
                 <label key={index} htmlFor={`image${index}`}>
                   <input onChange={(e) => {
@@ -150,6 +165,7 @@ const AddProduct = () => {
               required
             />
           </div>
+
           <div className="flex flex-col gap-1 max-w-md">
             <label className="text-base font-medium" htmlFor="brand">
               Brand
@@ -164,11 +180,9 @@ const AddProduct = () => {
               required
             />
           </div>
+
           <div className="flex flex-col gap-1 max-w-md">
-            <label
-              className="text-base font-medium"
-              htmlFor="product-description"
-            >
+            <label className="text-base font-medium" htmlFor="product-description">
               Description
             </label>
             <textarea
@@ -178,7 +192,7 @@ const AddProduct = () => {
               placeholder="Type here"
               onChange={(e) => setDescription(e.target.value)}
               value={description}
-            ></textarea>
+            />
           </div>
 
           <div className="flex items-center gap-5 flex-wrap">
@@ -190,7 +204,9 @@ const AddProduct = () => {
                 id="category"
                 className="outline-none md:py-2.5 py-2 px-3 rounded border border-gray-500/40"
                 onChange={(e) => setCategory(e.target.value)}
+                value={category}
               >
+                <option value="" hidden>Select</option>
                 <option value="men">Men</option>
                 <option value="women">Women</option>
                 <option value="accessories">Accessories</option>
@@ -200,6 +216,7 @@ const AddProduct = () => {
                 <option value="smartwatches">Smartwatches</option>
               </select>
             </div>
+
             <div className="flex flex-col gap-1 w-32">
               <label className="text-base font-medium" htmlFor="color">
                 Color
@@ -207,20 +224,21 @@ const AddProduct = () => {
               <input
                 id="color"
                 type="text"
-                placeholder="e.g. Red"
+                placeholder="eg. red"
                 className="outline-none md:py-2.5 py-2 px-3 rounded border border-gray-500/40"
                 onChange={(e) => setColor(e.target.value)}
                 value={color}
               />
             </div>
+
             <div className="flex flex-col gap-1 w-32">
               <label className="text-base font-medium" htmlFor="quantity">
                 Quantity
               </label>
               <input
                 id="quantity"
-                type="text"
-                placeholder="Enter Quantity"
+                type="number"
+                placeholder="eg. 100"
                 className="outline-none md:py-2.5 py-2 px-3 rounded border border-gray-500/40"
                 onChange={(e) => setQuantity(e.target.value)}
                 value={quantity}
@@ -244,6 +262,7 @@ const AddProduct = () => {
                 required
               />
             </div>
+
             <div className="flex flex-col gap-1 w-32">
               <label className="text-base font-medium" htmlFor="discount-percent">
                 Discount %
@@ -259,6 +278,7 @@ const AddProduct = () => {
                 value={discountPercent}
               />
             </div>
+
             <div className="flex flex-col gap-1 w-32">
               <label className="text-base font-medium" htmlFor="offer-price">
                 Discounted Price
@@ -273,6 +293,58 @@ const AddProduct = () => {
               />
             </div>
           </div>
+
+          {/* New Fields */}
+          <div className="flex items-center gap-5 flex-wrap">
+            <div className="flex items-center gap-3">
+              <label className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  checked={isFeatured}
+                  onChange={(e) => setIsFeatured(e.target.checked)}
+                  className="w-4 h-4"
+                />
+                <span className="text-base font-medium">Featured Product</span>
+              </label>
+            </div>
+
+            <div className="flex items-center gap-3">
+              <label className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  checked={isActive}
+                  onChange={(e) => setIsActive(e.target.checked)}
+                  className="w-4 h-4"
+                />
+                <span className="text-base font-medium">Active Product</span>
+              </label>
+            </div>
+
+            <div className="flex items-center gap-3">
+              <label className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  checked={isTrending}
+                  onChange={(e) => setIsTrending(e.target.checked)}
+                  className="w-4 h-4"
+                />
+                <span className="text-base font-medium">Trending Product</span>
+              </label>
+            </div>
+
+            <div className="flex items-center gap-3">
+              <label className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  checked={isNewArrival}
+                  onChange={(e) => setIsNewArrival(e.target.checked)}
+                  className="w-4 h-4"
+                />
+                <span className="text-base font-medium">New Arrival</span>
+              </label>
+            </div>
+          </div>
+
           <div className="flex gap-4">
             <button
               type="submit"
@@ -297,7 +369,6 @@ const AddProduct = () => {
               RESET
             </button>
           </div>
-
         </form>}
       <Footer />
     </div>

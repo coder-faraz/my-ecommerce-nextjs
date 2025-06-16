@@ -8,12 +8,16 @@ import Image from "next/image";
 import { useAppContext } from "@/context/AppContext";
 import Footer from "@/components/seller/Footer";
 import Loading from "@/components/Loading";
+import ProductEditModal from "@/components/seller/ProductEditModal";
 import { Utility } from "@/lib";
 
 const ProductList = () => {
 
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [selectedProductId, setSelectedProductId] = useState(null);
+
   const { router, getToken, user } = useAppContext();
   const { capitalizeFirstLetter } = Utility();
   const hasDiscounted = products.some(p => p.discountedPrice && p.discountedPrice < p.price);
@@ -38,6 +42,20 @@ const ProductList = () => {
     }
   }
 
+  const handleEditProduct = (productId) => {
+    setSelectedProductId(productId);
+    setIsEditModalOpen(true);
+  };
+
+  const handleCloseEditModal = () => {
+    setIsEditModalOpen(false);
+    setSelectedProductId(null);
+  };
+
+  const handleProductUpdate = () => {
+    fetchSellerProduct();
+  };
+
   useEffect(() => {
     if (user) {
       fetchSellerProduct();
@@ -61,6 +79,7 @@ const ProductList = () => {
                   <th className="px-4 py-3 font-medium text-right" style={{ width: hasDiscounted ? '10%' : '12%' }}>Price</th>
                   {hasDiscounted && <th className="px-4 py-3 font-medium text-right" style={{ width: '12%' }}>Discounted Price</th>}
                   <th className="px-4 py-3 font-medium text-center" style={{ width: hasDiscounted ? '8%' : '10%' }}>Quantity</th>
+                  <th className="px-4 py-3 font-medium text-center" style={{ width: hasDiscounted ? '8%' : '10%' }}>Sales</th>
                   <th className="px-4 py-3 font-medium text-center" style={{ width: hasDiscounted ? '10%' : '12%' }}>Action</th>
                 </tr>
               </thead>
@@ -96,16 +115,21 @@ const ProductList = () => {
                       {hasDiscounted && (
                         <td className="px-4 py-3 text-right font-medium text-green-600" style={{ width: '12%' }}>
                           {product.discountedPrice
-                            ? `${product.discountedPrice.toFixed(2)}`
+                            ? `$${product.discountedPrice.toFixed(2)}`
                             : '-'}
                         </td>
                       )}
                       <td className="px-4 py-3 text-center" style={{ width: hasDiscounted ? '8%' : '10%' }}>
                         {product.quantity}
                       </td>
+                      <td className="px-4 py-3 text-center" style={{ width: hasDiscounted ? '8%' : '10%' }}>
+                        {product.salesCount}
+                      </td>
                       <td className="px-4 py-3 text-center" style={{ width: hasDiscounted ? '10%' : '12%' }}>
-                        <button onClick={() => router.push(`/product/${product._id}`)} className="inline-flex items-center gap-1 px-3 py-2 bg-orange-600 text-white rounded-md hover:bg-orange-700 transition-colors text-sm">
-                          <span className="whitespace-nowrap">Visit</span>
+                        <button className="inline-flex items-center gap-1 px-3 py-2 bg-orange-600 text-white rounded-md hover:bg-orange-700 transition-colors text-sm"
+                          onClick={() => handleEditProduct(product._id)}
+                        >
+                          <span className="whitespace-nowrap">Edit</span>
                           <Image
                             className="h-3.5 w-3.5 flex-shrink-0"
                             src={assets.redirect_icon}
@@ -169,10 +193,10 @@ const ProductList = () => {
                     </div>
                     <div className="mt-3">
                       <button
-                        onClick={() => router.push(`/product/${product._id}`)}
+                        onClick={() => handleEditProduct(product._id)}
                         className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-orange-600 text-white rounded-md text-sm hover:bg-orange-700 transition-colors"
                       >
-                        <span>Visit Product</span>
+                        <span>Edit</span>
                         <Image
                           className="h-3.5 w-3.5"
                           src={assets.redirect_icon}
@@ -237,8 +261,10 @@ const ProductList = () => {
                         </td>
                         <td className="px-4 py-3">{product.quantity}</td>
                         <td className="px-4 py-3">
-                          <button onClick={() => router.push(`/product/${product._id}`)} className="flex items-center gap-1 px-3 py-2 bg-orange-600 text-white rounded-md text-sm hover:bg-orange-700 transition-colors">
-                            <span>Visit</span>
+                          <button className="flex items-center gap-1 px-3 py-2 bg-orange-600 text-white rounded-md text-sm hover:bg-orange-700 transition-colors"
+                            onClick={() => handleEditProduct(product._id)}
+                          >
+                            <span>Edit</span>
                             <Image
                               className="h-3 w-3"
                               src={assets.redirect_icon}
@@ -256,6 +282,14 @@ const ProductList = () => {
           </div>
         </div>
       </div>}
+      {isEditModalOpen && (
+        <ProductEditModal
+          isOpen={isEditModalOpen}
+          onClose={handleCloseEditModal}
+          productId={selectedProductId}
+          onProductUpdate={handleProductUpdate}
+        />
+      )}
       <Footer />
     </div>
   );

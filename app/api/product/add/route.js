@@ -34,6 +34,12 @@ export async function POST(request) {
         const quantity = formData.get('quantity') || 0;
         const discountPercent = parseFloat(formData.get('discountPercent') || 0);
         const discountedPrice = parseFloat(formData.get('discountedPrice') || 0);
+        // New fields
+        const salesCount = parseInt(formData.get('salesCount') || 0);
+        const isFeatured = formData.get('isFeatured') === 'true';
+        const isActive = formData.get('isActive') === 'true';
+        const isTrending = formData.get('isTrending') === 'true';
+        const isNewArrival = formData.get('isNewArrival') === 'true';
 
         // Validate category and get category ID
         const categoryId = await getCategoryIdByName(category);
@@ -87,20 +93,23 @@ export async function POST(request) {
             description,
             brand,
             color,
-            category, // Keep for backward compatibility
-            categoryId, // New reference field
+            category,
+            categoryId,
             quantity: Number(quantity),
             price: Number(price),
             discountPercent,
             discountedPrice,
+            salesCount,
+            isFeatured,
+            isTrending,
+            isNewArrival,
+            isActive,
             images
         });
 
-        // return the newly created Product
         return NextResponse.json({ success: true, message: 'Upload Successful', newProduct });
     } catch (error) {
         console.error(error, 'error in product route');
-        // On any other error, return a 500-style JSON response
         return NextResponse.json(
             { success: false, message: error.message },
             { status: 500 }

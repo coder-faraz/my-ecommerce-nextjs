@@ -117,13 +117,18 @@ export const userOrderCreation = inngest.createFunction(
         await connectToDB();
         await Order.insertMany(orders);
 
-        // 3) Decrement product inventory for each ordered item
+        // 3) Update product inventory and sales count for each ordered item
         for (const e of events) {
             for (const { productId, quantity } of e.data.items) {
-                // Subtract ordered quantity from product stock
+                // Subtract ordered quantity from product stock AND increment sales count
                 await Product.findByIdAndUpdate(
                     productId,
-                    { $inc: { quantity: -quantity } },
+                    {
+                        $inc: {
+                            quantity: -quantity,     // Decrease inventory
+                            salesCount: quantity     // Increase sales count by sold quantity
+                        }
+                    },
                     { new: true }
                 );
             }

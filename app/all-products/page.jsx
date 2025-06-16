@@ -1,6 +1,7 @@
 'use client'
 import axios from 'axios';
 import { useState, useEffect } from 'react';
+import { useSearchParams, useRouter } from 'next/navigation';
 import toast from "react-hot-toast";
 
 import ProductCard from "@/components/ProductCard";
@@ -15,7 +16,9 @@ const AllProducts = () => {
     const [selectedCategory, setSelectedCategory] = useState(null);
     const [loading, setLoading] = useState(false);
 
-    // Get wishlist functionality from context
+    const searchParams = useSearchParams();
+    const router = useRouter();
+    const searchQuery = searchParams.get('search') || '';
     const { wishlistItems, toggleWishlist, user } = useAppContext();
 
     // Pagination states
@@ -61,7 +64,12 @@ const AllProducts = () => {
         fetchCategories();
     }, []);
 
-    // Fetch products whenever selectedCategory or currentPage changes
+    useEffect(() => {
+        if (searchQuery) {
+            setCurrentPage(1);
+        }
+    }, [searchQuery]);
+
     useEffect(() => {
         const fetchProducts = async () => {
             setLoading(true);
@@ -71,6 +79,9 @@ const AllProducts = () => {
 
                 if (selectedCategory) {
                     url += `&categoryId=${selectedCategory}`;
+                }
+                if (searchQuery) {
+                    url += `&search=${encodeURIComponent(searchQuery)}`;
                 }
 
                 const { data } = await axios.get(url);
@@ -89,7 +100,7 @@ const AllProducts = () => {
             }
         };
         fetchProducts();
-    }, [selectedCategory, currentPage]);
+    }, [selectedCategory, currentPage, searchQuery]);
 
     // Apply filters and sorting whenever products or filter states change
     useEffect(() => {
@@ -134,10 +145,15 @@ const AllProducts = () => {
         setFilteredProducts(filtered);
     }, [products, priceRange, selectedRating, sortBy]);
 
-    // Handle category change - reset to page 1
+    // Handle category change - reset to page 1 and clear search
     const handleCategoryChange = (categoryId) => {
         setSelectedCategory(categoryId);
         setCurrentPage(1);
+
+        // Clear search query from URL when changing categories
+        if (searchQuery) {
+            router.push('/all-products');
+        }
     };
 
     // Handle page change
@@ -156,6 +172,16 @@ const AllProducts = () => {
         setSortBy('newest');
         setSelectedCategory(null);
         setCurrentPage(1);
+
+        // Clear search query from URL
+        if (searchQuery) {
+            router.push('/all-products');
+        }
+    };
+
+    // Clear search function
+    const clearSearch = () => {
+        router.push('/all-products');
     };
 
     const renderStars = (rating, clickable = false, onClick = null) => {
@@ -353,6 +379,28 @@ const AllProducts = () => {
                             </button>
                         </div>
 
+                        {/* Search Result Banner */}
+                        {searchQuery && (
+                            <div className="w-full bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+                                <div className="flex items-center justify-between">
+                                    <div>
+                                        <p className="text-blue-800 font-medium">
+                                            Search results for: "{searchQuery}"
+                                        </p>
+                                        <p className="text-blue-600 text-sm">
+                                            {filteredProducts.length} products found
+                                        </p>
+                                    </div>
+                                    <button
+                                        onClick={clearSearch}
+                                        className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 text-sm"
+                                    >
+                                        Clear Search
+                                    </button>
+                                </div>
+                            </div>
+                        )}
+
                         {/* Mobile Filters */}
                         {showFilters && (
                             <div className="lg:hidden w-full bg-white rounded-lg shadow-sm border p-4 mb-6">
@@ -461,6 +509,7 @@ const AllProducts = () => {
                         <div className="flex justify-between items-center w-full mb-4">
                             <p className="text-sm text-gray-600">
                                 Showing {filteredProducts.length} of {products.length} products
+                                {searchQuery && ` for "${searchQuery}"`}
                                 {totalProducts > products.length && ` (Page ${currentPage} of ${totalPages})`}
                             </p>
                             {totalPages > 1 && (
