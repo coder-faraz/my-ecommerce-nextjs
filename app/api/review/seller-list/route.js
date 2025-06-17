@@ -39,7 +39,7 @@ async function updateProductStats(productId) {
     }
 }
 
-// GET - Fetch all reviews for admin (pending, approved, rejected)
+// GET - Fetch all reviews for seller (pending, approved, rejected)
 export async function GET(request) {
     try {
         const { searchParams } = new URL(request.url);

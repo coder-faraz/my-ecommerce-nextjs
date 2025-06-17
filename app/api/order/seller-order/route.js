@@ -7,6 +7,20 @@ import Product from "@/models/Product";
 import Order from "@/models/Order";
 import authSeller from "@/lib/authSeller";
 
+/**
+ * Handles GET requests to retrieve all orders for authorized sellers.
+ *
+ * Responsibilities:
+ *  - Authenticate the user using Clerk.
+ *  - Verify the user is a seller using `authSeller`.
+ *  - Connect to MongoDB.
+ *  - Fetch and return all orders, including populated fields.
+ *
+ * Returns:
+ *  - 200 with order list if successful.
+ *  - 404 if the user is unauthorized (not a seller).
+ *  - 500 if a server or DB error occurs.
+ */
 export async function GET(request) {
     try {
         // Extract the authenticated user’s ID from the request

@@ -7,6 +7,7 @@ import Coupon from "@/models/Coupon";
 import User from "@/models/User";
 import UserCouponUsage from "@/models/UserCouponUsage";
 
+// UPDATE - Update existing coupon (Seller Only)
 export async function PUT(request, { params }) {
     try {
         const { userId } = getAuth(request);
@@ -85,7 +86,7 @@ export async function PUT(request, { params }) {
     }
 }
 
-// DELETE - Delete coupon (Admin only)
+// DELETE - Delete coupon (Seller Only)
 export async function DELETE(request, { params }) {
     try {
         const { userId } = getAuth(request);
@@ -137,7 +138,7 @@ export async function DELETE(request, { params }) {
     }
 }
 
-// GET - Get single coupon details (Admin only)
+// GET - Get single coupon details (Seller only)
 export async function GET(request, { params }) {
     try {
         const { userId } = getAuth(request);

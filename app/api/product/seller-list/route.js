@@ -5,6 +5,19 @@ import connectToDB from "@/config/db";
 import authSeller from "@/lib/authSeller";
 import Product from "@/models/Product";
 
+/**
+ * GET handler to fetch all products for an authenticated seller.
+ * 
+ * Features:
+ * - Verifies user authentication and seller status
+ * - Connects to the database
+ * - Retrieves and returns all products (sorted by creation date)
+ * - Populates category name using `categoryId`
+ * - Adds `categoryName` field for clarity in frontend
+ * 
+ * @param {Request} request - HTTP request object
+ * @returns {NextResponse} - JSON response with product data or error
+ */
 export async function GET(request) {
     try {
         // Extract the authenticated user’s ID from the request

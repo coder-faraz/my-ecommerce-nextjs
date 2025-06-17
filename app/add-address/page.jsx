@@ -12,6 +12,7 @@ import Footer from "@/components/Footer";
 import Loading from "@/components/Loading";
 
 const AddAddress = () => {
+    // State to hold the address form data
     const [address, setAddress] = useState({
         fullname: '',
         contact: '',
@@ -22,12 +23,21 @@ const AddAddress = () => {
         state: '',
         landmark: '',
     });
+
+    // Loading state for when submitting the form
     const [loading, setLoading] = useState(false);
+
+    // Boolean to track if the required form fields are filled
     const [isFormValid, setIsFormValid] = useState(false);
+
+    // Get helper functions and router from app context
     const { getToken, router } = useAppContext();
 
+    // useEffect to check if the form is valid whenever the address changes
     useEffect(() => {
         const { fullname, contact, pincode, area, city, state } = address;
+
+        // Check if required fields are filled
         const isValid =
             fullname.trim() &&
             contact.trim() &&
@@ -35,33 +45,37 @@ const AddAddress = () => {
             area.trim() &&
             city.trim() &&
             state.trim();
+
         setIsFormValid(Boolean(isValid));
     }, [address]);
 
+    // Function to handle form submission
     const onSubmitHandler = async (e) => {
-        e.preventDefault();
-        setLoading(true);
+        e.preventDefault(); // Prevent page reload on form submit
+        setLoading(true); // Show loading spinner
 
         try {
-            const token = await getToken();
+            const token = await getToken(); // Get the auth token
+
+            // Send POST request to add the address
             const { data } = await axios.post('/api/user/add-address', { address }, {
                 headers: {
-                    Authorization: `Bearer ${token}`
+                    Authorization: `Bearer ${token}` // Set auth header
                 }
             });
 
             if (data.success) {
-                setLoading(false);
-                toast.success(data.message);
-                router.push('/cart');
+                setLoading(false); // Stop loading
+                toast.success(data.message); // Show success toast
+                router.push('/cart'); // Redirect to cart page
             } else {
-                setLoading(false);
-                toast.error(data.message);
+                setLoading(false); // Stop loading
+                toast.error(data.message); // Show error toast from server
             }
         } catch (error) {
-            setLoading(false);
-            toast.error(error.message || "Something Went Wrong");
-            console.log(error, 'error adding user address');
+            setLoading(false); // Stop loading
+            toast.error(error.message || "Something Went Wrong"); // Show fallback error message
+            console.log(error, 'error adding user address'); // Log error for debugging
         }
     };
 

@@ -4,8 +4,21 @@ import connectToDB from "@/config/db";
 import Product from "@/models/Product";
 import Category from "@/models/Category";
 
+/**
+ * Handles GET request to fetch products with filtering, sorting, and pagination.
+ *
+ * Features:
+ * - Filter by category, price, rating, keyword, product type (latest, featured, etc.)
+ * - Sort by price, rating, name, sales, or newest
+ * - Pagination support
+ * - Returns metadata like price range and rating options for frontend filters
+ *
+ * @param {Request} request - HTTP Request object
+ * @returns {NextResponse} JSON response with products and metadata
+ */
 export async function GET(request) {
     try {
+        // Parse Query Parameters from URL
         const { searchParams } = new URL(request.url);
         const categoryId = searchParams.get("categoryId");
         const page = parseInt(searchParams.get("page")) || 1;
@@ -18,7 +31,7 @@ export async function GET(request) {
         const sortBy = searchParams.get("sortBy");
         const searchTerm = searchParams.get("search");
 
-        // New filter parameters
+        // filter parameters
         const filterType = searchParams.get("filterType"); // 'latest', 'topRated', 'bestSelling', 'featured'
 
         const query = { isActive: true }; // Only show active products

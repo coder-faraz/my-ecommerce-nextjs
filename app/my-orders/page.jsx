@@ -9,11 +9,24 @@ import Loading from "@/components/Loading";
 import axios from "axios";
 import toast from "react-hot-toast";
 
+/**
+ * MyOrders Component
+ * 
+ * Fetches and displays a list of the user's past orders.
+ * Includes order details such as items, shipping address, total amount,
+ * order method, and date.
+ */
 const MyOrders = () => {
     const [orders, setOrders] = useState([]);
     const [loading, setLoading] = useState(true);
     const { currency, getToken, user } = useAppContext();
 
+    /**
+ * Fetch orders from the backend API
+ * Uses the user's token for authorization.
+ * On success, sets the orders in reverse chronological order.
+ * On failure, shows an error toast and logs error.
+ */
     const fetchOrders = async () => {
         try {
             const token = await getToken();

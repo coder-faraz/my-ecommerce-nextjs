@@ -5,7 +5,7 @@ import connectToDB from '@/config/db';
 import authSeller from '@/lib/authSeller';
 import Category from '@/models/Category';
 
-// GET: Fetch all categories with populated parent names
+// GET: Fetch all categories with populated parent names - this is a seller dashboard api
 export async function GET(request) {
     try {
         // Extract the authenticated user’s ID from the request

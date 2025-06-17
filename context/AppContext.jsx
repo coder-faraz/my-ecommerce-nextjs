@@ -7,12 +7,15 @@ import { productsDummyData, userDummyData } from "@/assets/assets";
 import { createContext, useContext, useEffect, useState } from "react";
 import toast from "react-hot-toast";
 
+// Create a React context to manage global app state
 export const AppContext = createContext();
 
+// Custom hook to access context easily
 export const useAppContext = () => {
     return useContext(AppContext)
 }
 
+// Context Provider component to wrap the app
 export const AppContextProvider = (props) => {
 
     const [products, setProducts] = useState([])
@@ -22,10 +25,13 @@ export const AppContextProvider = (props) => {
     const [wishlistItems, setWishlistItems] = useState([])
     const router = useRouter()
 
-    const { user } = useUser();
-    const { getToken } = useAuth();
+    const { user } = useUser();     // Clerk user object
+    const { getToken } = useAuth();  // Auth token function from Clerk
     const currency = process.env.NEXT_PUBLIC_CURRENCY;
 
+    /**
+    * Fetch all available products from backend API
+    */
     const fetchProductData = async () => {
         try {
             const { data } = await axios.get('/api/product/list')
@@ -40,6 +46,9 @@ export const AppContextProvider = (props) => {
         }
     }
 
+    /**
+  * Fetch logged-in user's data from backend and initialize cart and wishlist
+  */
     const fetchUserData = async () => {
         try {
             if (user.publicMetadata.role === 'seller') {
@@ -62,6 +71,10 @@ export const AppContextProvider = (props) => {
         }
     }
 
+    /**
+   * Add an item to the cart. If already present, increment quantity.
+   * Also sync with backend if user is logged in.
+   */
     const addToCart = async (itemId) => {
         let cartData = structuredClone(cartItems);
         if (cartData[itemId]) {
@@ -83,6 +96,9 @@ export const AppContextProvider = (props) => {
         }
     }
 
+    /**
+    * Update quantity of a cart item or remove if quantity = 0
+    */
     const updateCartQuantity = async (itemId, quantity) => {
         let cartData = structuredClone(cartItems);
         if (quantity === 0) {
@@ -103,6 +119,9 @@ export const AppContextProvider = (props) => {
         }
     }
 
+    /**
+ * Add item to wishlist and sync with backend
+ */
     const addToWishlist = async (itemId) => {
         if (!user) {
             toast.error('Please login to add items to wishlist');
@@ -133,6 +152,9 @@ export const AppContextProvider = (props) => {
         }
     }
 
+    /**
+    * Remove item from wishlist and sync with backend
+    */
     const removeFromWishlist = async (itemId) => {
         if (!user) {
             toast.error('Please login to Remove items from wishlist');
@@ -158,6 +180,9 @@ export const AppContextProvider = (props) => {
         }
     }
 
+    /**
+   * Toggle wishlist status for a product
+   */
     const toggleWishlist = async (itemId) => {
         if (wishlistItems.includes(itemId)) {
             await removeFromWishlist(itemId);
@@ -166,6 +191,9 @@ export const AppContextProvider = (props) => {
         }
     }
 
+    /**
+ * Get total number of items in the cart
+ */
     const getCartCount = () => {
         let totalCount = 0;
         for (const items in cartItems) {
@@ -176,6 +204,9 @@ export const AppContextProvider = (props) => {
         return totalCount;
     }
 
+    /**
+   * Get total number of wishlist items
+   */
     const getWishlistCount = () => {
         return wishlistItems.length;
     }
@@ -234,6 +265,7 @@ export const AppContextProvider = (props) => {
         getCartCount, getWishlistCount, getCartTotals
     }
 
+    // Provide the context to all children
     return (
         <AppContext.Provider value={value}>
             {props.children}

@@ -14,6 +14,18 @@ cloudinary.config({
     api_secret: process.env.CLOUDINARY_API_SECRET
 });
 
+/**
+ * Handles product creation via multipart form submission.
+ *
+ * Features:
+ * - Seller-only access
+ * - Uploads product images to Cloudinary
+ * - Saves product data to MongoDB
+ * - Validates category and images
+ *
+ * @param {Request} request - Incoming HTTP request
+ * @returns {NextResponse} JSON response with success or failure
+ */
 export async function POST(request) {
     try {
         // Extract the authenticated user's ID from the request
@@ -34,7 +46,6 @@ export async function POST(request) {
         const quantity = formData.get('quantity') || 0;
         const discountPercent = parseFloat(formData.get('discountPercent') || 0);
         const discountedPrice = parseFloat(formData.get('discountedPrice') || 0);
-        // New fields
         const salesCount = parseInt(formData.get('salesCount') || 0);
         const isFeatured = formData.get('isFeatured') === 'true';
         const isActive = formData.get('isActive') === 'true';
@@ -59,7 +70,7 @@ export async function POST(request) {
             );
         }
 
-        // Upload the images
+        // Upload the images to cloudinary
         const result = await Promise.all(
             imgFiles.map(async file => {
                 const arrayBuffer = await file.arrayBuffer();

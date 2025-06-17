@@ -1,4 +1,3 @@
-// app/api/coupons/apply/route.js
 import { getAuth } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 import connectToDB from "@/config/db";
@@ -6,6 +5,18 @@ import Coupon from "@/models/Coupon";
 import UserCouponUsage from "@/models/UserCouponUsage";
 import User from "@/models/User";
 
+/**
+ * POST handler to apply a coupon to the user's cart.
+ * Validates coupon based on multiple rules including:
+ * - Authentication
+ * - Coupon existence and validity
+ * - Usage limits and eligibility
+ * - Order total boundaries
+ * - Product and category restrictions
+ * 
+ * @param {Request} request - The incoming HTTP request
+ * @returns {Response} JSON response with success/failure and discount details
+ */
 export async function POST(request) {
     try {
         const { userId } = getAuth(request);
@@ -171,7 +182,14 @@ export async function POST(request) {
     }
 }
 
-// Helper function to validate product/category restrictions
+/**
+ * Validates whether the coupon can be applied to the cart items
+ * based on product/category inclusion and exclusion rules.
+ *
+ * @param {Object} coupon - The coupon document
+ * @param {Array} cartItems - Items in the user's cart
+ * @returns {Object} Validation result with `valid` boolean and optional `message`
+ */
 async function validateProductRestrictions(coupon, cartItems) {
     // If no restrictions, coupon applies to all products
     if (coupon.applicableProducts.length === 0 &&

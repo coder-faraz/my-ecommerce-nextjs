@@ -37,37 +37,39 @@ const OrderSummary = () => {
     setIsDropdownOpen(false);
   };
 
+  // This code is commented to check payment-screen page & will be implemented after payment is successful
   const createOrder = async () => {
     try {
-      if (!selectedAddress) {
-        return toast.error("Select An Address To Continue");
-      }
+      // if (!selectedAddress) {
+      //   return toast.error("Select An Address To Continue");
+      // }
 
-      let cartItemsArr = Object
-        .keys(cartItems)
-        .map(key => ({ productId: key, quantity: cartItems[key] }))
-        .filter(item => item.quantity > 0);
+      // let cartItemsArr = Object
+      //   .keys(cartItems)
+      //   .map(key => ({ productId: key, quantity: cartItems[key] }))
+      //   .filter(item => item.quantity > 0);
 
-      if (cartItemsArr.length === 0) {
-        return toast.error("Select Items To Continue");
-      }
+      // if (cartItemsArr.length === 0) {
+      //   return toast.error("Select Items To Continue");
+      // }
 
-      const token = await getToken();
-      const { data } = await axios.post('/api/order/create', {
-        addressId: selectedAddress._id,
-        items: cartItemsArr
-      }, {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      })
+      // const token = await getToken();
+      // const { data } = await axios.post('/api/order/create', {
+      //   addressId: selectedAddress._id,
+      //   items: cartItemsArr
+      // }, {
+      //   headers: {
+      //     Authorization: `Bearer ${token}`
+      //   }
+      // })
 
-      if (data.success) {
-        setCartItems({});
-        router.push('/payment-screen');
-      } else {
-        toast.error(data.message);
-      }
+      // if (data.success) {
+      //   setCartItems({});
+      //   router.push('/payment-screen');
+      // } else {
+      //   toast.error(data.message);
+      // }
+      router.push('/payment-screen')
     } catch (error) {
       toast.error(error.message);
       console.log('error in create order fe', error);
@@ -133,7 +135,7 @@ const OrderSummary = () => {
           </div>
         </div>
 
-        {/* <div>
+        <div>
           <label className="text-base font-medium uppercase text-gray-600 block mb-2">
             Promo Code
           </label>
@@ -147,7 +149,7 @@ const OrderSummary = () => {
               Apply
             </button>
           </div>
-        </div> */}
+        </div>
 
         <hr className="border-gray-500/30 my-5" />
 

@@ -20,7 +20,7 @@ export async function GET(request) {
                 { status: 404 }
             );
         }
-        // Otherwise return the user data
+        // Otherwise return the user cart-items
         return NextResponse.json({ success: true, cartItems: user.cartItems });
     } catch (error) {
         console.error(error, 'error in get cart route');

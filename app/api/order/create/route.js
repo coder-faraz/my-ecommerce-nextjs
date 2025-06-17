@@ -6,7 +6,21 @@ import User from "@/models/User";
 import Product from "@/models/Product";
 import { inngest } from "@/config/inngest";
 
-
+/**
+ * Handles order creation when a customer places an order.
+ *
+ * Responsibilities:
+ *  - Authenticates the user via Clerk.
+ *  - Validates payload (address and items).
+ *  - Fetches product info from DB and calculates price breakdown.
+ *  - Computes totals, tax, and shipping fee.
+ *  - Emits an Inngest event (`order/created`) for async processing:
+ *      - Order storage
+ *      - Inventory update
+ *  - Clears user's cart.
+ *
+ * Returns a success response if everything is valid and event is sent.
+ */
 export async function POST(request) {
     try {
         // 1) Auth
@@ -72,6 +86,7 @@ export async function POST(request) {
                 totalAmount
             }
         });
+        // Clear user's cart after placing order
         user.cartItems = {};
         await user.save();
 

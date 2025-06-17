@@ -6,8 +6,14 @@ import Image from "next/image";
 import Navbar from "@/components/Navbar";
 import { useAppContext } from "@/context/AppContext";
 
+/**
+ * Cart Component
+ * 
+ * Displays the user's shopping cart, including product details, quantity controls, subtotal,
+ * and links for continuing shopping or proceeding to checkout.
+ */
 const Cart = () => {
-
+  // Destructure necessary values and functions from AppContext
   const { products, router, cartItems, addToCart, updateCartQuantity, getCartCount } = useAppContext();
 
   return (

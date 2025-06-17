@@ -5,6 +5,14 @@ import connectToDB from "@/config/db";
 import authSeller from "@/lib/authSeller";
 import Coupon from "@/models/Coupon";
 
+/**
+ * GET Handler - Fetch all coupons created by sellers.
+ * 
+ * - Verifies if the user is a seller.
+ * - Connects to the database.
+ * - Fetches all coupons from the collection.
+ * - Returns coupons sorted by creation date (newest first).
+ */
 export async function GET(request) {
     try {
         const { userId } = getAuth(request);
@@ -33,7 +41,15 @@ export async function GET(request) {
     }
 }
 
-// POST - Create New Coupon
+/**
+ * POST Handler - Create a new coupon.
+ * 
+ * - Verifies if the user is a seller.
+ * - Validates request body for required fields.
+ * - Checks if the coupon code is unique.
+ * - Validates discount type and value.
+ * - Creates and saves the new coupon document.
+ */
 export async function POST(request) {
     try {
         const { userId } = getAuth(request);

@@ -5,10 +5,20 @@ import User from "@/models/User";
 import Product from "@/models/Product";
 import Order from "@/models/Order";
 
-// Create a client to send and receive events
+/**
+ * Initialize an Inngest client for your e-commerce application.
+ * This client will be used to create and handle event-driven functions.
+ */
 export const inngest = new Inngest({ id: "my-ecommerce" });
 
-// Inngest function to save user data to db
+/**
+ * Syncs a newly created Clerk user to the MongoDB database.
+ *
+ * Triggered by the event: `clerk/user.created`
+ * - Extracts relevant user details from the event payload.
+ * - Connects to MongoDB.
+ * - Creates a new `User` document in the database.
+ */
 export const syncUserCreation = inngest.createFunction(
     {
         id: "create-user-from-clerk"
@@ -29,7 +39,14 @@ export const syncUserCreation = inngest.createFunction(
     }
 );
 
-// Inngest function to update user data to db
+/**
+ * Updates a user's data in the MongoDB database when the user is updated in Clerk.
+ *
+ * Triggered by the event: `clerk/user.updated`
+ * - Extracts updated user data from the event.
+ * - Connects to MongoDB.
+ * - Updates the existing `User` document using `findByIdAndUpdate`.
+ */
 export const syncUserUpdation = inngest.createFunction(
     {
         id: "update-user-from-clerk"
@@ -50,7 +67,13 @@ export const syncUserUpdation = inngest.createFunction(
     }
 );
 
-// Inngest function to delete user data to db
+/**
+ * Deletes a user's data from MongoDB when the user is removed from Clerk.
+ *
+ * Triggered by the event: `clerk/user.deleted`
+ * - Connects to MongoDB.
+ * - Deletes the user record by ID.
+ */
 export const syncUserDeletion = inngest.createFunction(
     {
         id: "delete-user-from-clerk"
@@ -65,10 +88,17 @@ export const syncUserDeletion = inngest.createFunction(
     }
 );
 
-// Inngest function to create user order in db
 /**
- * Listens for up to 5 `order/created` events (3s timeout),
- * then writes them as Order documents in one batch.
+ * Handles order creation in bulk by processing up to 5 `order/created` events at a time.
+ *
+ * Triggered by the event: `order/created`
+ * Batched with:
+ * - `maxSize`: 5 events
+ * - `timeout`: 3 seconds
+ *
+ * Responsibilities:
+ * - Insert orders into MongoDB using `insertMany`.
+ * - Update product inventory (reduce stock) and increment sales count accordingly.
  */
 export const userOrderCreation = inngest.createFunction(
     {

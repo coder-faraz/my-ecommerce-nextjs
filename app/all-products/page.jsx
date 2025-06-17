@@ -19,6 +19,7 @@ const AllProducts = () => {
     const searchParams = useSearchParams();
     const router = useRouter();
     const searchQuery = searchParams.get('search') || '';
+    // App context values
     const { wishlistItems, toggleWishlist, user } = useAppContext();
 
     // Pagination states
@@ -64,12 +65,14 @@ const AllProducts = () => {
         fetchCategories();
     }, []);
 
+    // Reset page to 1 if search query changes
     useEffect(() => {
         if (searchQuery) {
             setCurrentPage(1);
         }
     }, [searchQuery]);
 
+    // Fetch products when category, page, or search query changes
     useEffect(() => {
         const fetchProducts = async () => {
             setLoading(true);
@@ -184,6 +187,7 @@ const AllProducts = () => {
         router.push('/all-products');
     };
 
+    // Star rating UI renderer
     const renderStars = (rating, clickable = false, onClick = null) => {
         return (
             <div className="flex gap-1">

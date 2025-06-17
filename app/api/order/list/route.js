@@ -6,6 +6,18 @@ import Address from "@/models/Address";
 import Product from "@/models/Product";
 import Order from "@/models/Order";
 
+/**
+ * Handles GET requests to retrieve a user's orders.
+ *
+ * Responsibilities:
+ *  - Authenticate the user using Clerk.
+ *  - Connect to MongoDB.
+ *  - Fetch orders placed by the user.
+ *  - Populate associated fields: shipping address and ordered product details.
+ * 
+ * Returns:
+ *  - JSON response with the list of orders or appropriate error messages.
+ */
 export async function GET(request) {
     try {
         // Extract the authenticated user’s ID from the request

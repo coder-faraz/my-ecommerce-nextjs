@@ -4,6 +4,11 @@ import connectToDB from "@/config/db";
 import Coupon from "@/models/Coupon";
 import UserCouponUsage from "@/models/UserCouponUsage";
 
+/**
+ * GET Handler to retrieve all valid and applicable coupons for a user based on their cart.
+ * Performs authentication, filters coupons based on eligibility, usage, cart value, 
+ * and restrictions, then returns the best available ones.
+ */
 export async function GET(request) {
     try {
         const { userId } = getAuth(request);
@@ -114,6 +119,14 @@ export async function GET(request) {
     }
 }
 
+/**
+ * Helper function to validate product and category restrictions for a coupon.
+ * Checks whether products in the cart match allowed or excluded products/categories.
+ *
+ * @param {Object} coupon - Coupon document from database
+ * @param {Array} cartItems - List of cart item objects with productId and category
+ * @returns {Object} - { valid: boolean, message?: string }
+ */
 async function validateProductRestrictions(coupon, cartItems) {
     if (coupon.applicableProducts.length === 0 &&
         coupon.applicableCategories.length === 0 &&

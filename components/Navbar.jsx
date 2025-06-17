@@ -84,10 +84,10 @@ const Navbar = () => {
         <Link href="/all-products" className="hover:text-gray-900 transition">
           Shop
         </Link>
-        <Link href="/" className="hover:text-gray-900 transition">
+        <Link href="/about-us" className="hover:text-gray-900 transition">
           About Us
         </Link>
-        <Link href="/" className="hover:text-gray-900 transition">
+        <Link href="/contact" className="hover:text-gray-900 transition">
           Contact
         </Link>
         {isSeller && <button onClick={() => router.push('/seller')} className="text-xs border px-4 py-1.5 rounded-full">Seller Dashboard</button>}
@@ -139,7 +139,6 @@ const Navbar = () => {
               aria-label="Wishlist"
             >
               <Image src={assets.heart_icon} alt="wishlist" className="w-5 h-5" />
-              {/* Optional: Add wishlist count badge */}
               <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">{getWishlistCount()}</span>
             </button>
 
@@ -150,7 +149,6 @@ const Navbar = () => {
               aria-label="Shopping Cart"
             >
               <CartIcon className="w-5 h-5 text-gray-600 group-hover:text-blue-600 transition-colors" />
-              {/* Optional: Add cart count badge */}
               <span className="absolute -top-1 -right-1 bg-blue-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">{getCartCount()}</span>
             </button>
 
@@ -175,46 +173,48 @@ const Navbar = () => {
               }
             }}
           >
-            {/* Mobile menu items when user is not seller */}
-            {!isSeller && (
-              <>
-                <UserButton.MenuItems>
-                  <UserButton.Action
-                    label='Home'
-                    labelIcon={<HomeIcon />}
-                    onClick={() => router.push('/')}
-                  />
-                </UserButton.MenuItems>
-                <UserButton.MenuItems>
-                  <UserButton.Action
-                    label='Products'
-                    labelIcon={<BoxIcon />}
-                    onClick={() => router.push('/all-products')}
-                  />
-                </UserButton.MenuItems>
-                <UserButton.MenuItems>
-                  <UserButton.Action
-                    label='Wishlist'
-                    labelIcon={<Image src={assets.heart_icon} alt="wishlist" className="w-4 h-4" />}
-                    onClick={() => router.push('/wishlist')}
-                  />
-                </UserButton.MenuItems>
-                <UserButton.MenuItems>
-                  <UserButton.Action
-                    label='Cart'
-                    labelIcon={<CartIcon />}
-                    onClick={() => router.push('/cart')}
-                  />
-                </UserButton.MenuItems>
-                <UserButton.MenuItems>
-                  <UserButton.Action
-                    label='My Orders'
-                    labelIcon={<BagIcon />}
-                    onClick={() => router.push('/my-orders')}
-                  />
-                </UserButton.MenuItems>
-              </>
-            )}
+            <UserButton.MenuItems>
+              <UserButton.Action
+                label='Home'
+                labelIcon={<HomeIcon />}
+                onClick={() => router.push('/')}
+              />
+            </UserButton.MenuItems>
+            <UserButton.MenuItems>
+              <UserButton.Action
+                label='Products'
+                labelIcon={<BoxIcon />}
+                onClick={() => router.push('/all-products')}
+              />
+            </UserButton.MenuItems>
+            <UserButton.MenuItems>
+              <UserButton.Action
+                label='About Us'
+                labelIcon={<BoxIcon />}
+                onClick={() => router.push('/about-us')}
+              />
+            </UserButton.MenuItems>
+            <UserButton.MenuItems>
+              <UserButton.Action
+                label='Wishlist'
+                labelIcon={<Image src={assets.heart_icon} alt="wishlist" className="w-4 h-4" />}
+                onClick={() => router.push('/wishlist')}
+              />
+            </UserButton.MenuItems>
+            <UserButton.MenuItems>
+              <UserButton.Action
+                label='Cart'
+                labelIcon={<CartIcon />}
+                onClick={() => router.push('/cart')}
+              />
+            </UserButton.MenuItems>
+            <UserButton.MenuItems>
+              <UserButton.Action
+                label='My Orders'
+                labelIcon={<BagIcon />}
+                onClick={() => router.push('/my-orders')}
+              />
+            </UserButton.MenuItems>
           </UserButton>
         ) : (
           <button

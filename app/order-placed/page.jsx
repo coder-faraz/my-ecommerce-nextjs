@@ -4,6 +4,11 @@ import { useAppContext } from '@/context/AppContext'
 import Image from 'next/image'
 import { useEffect } from 'react'
 
+/**
+ * OrderPlaced Component
+ * 
+ * Can be used when payment is successful.......right now, it is not used
+ */
 const OrderPlaced = () => {
 
   const { router } = useAppContext()
